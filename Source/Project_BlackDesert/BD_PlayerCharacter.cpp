@@ -2,6 +2,8 @@
 
 
 #include "BD_PlayerCharacter.h"
+#include "BD_HealthBar.h"
+#include "BD_AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Camera/CameraComponent.h"
@@ -9,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameplayTagContainer.h"
 
 ABD_PlayerCharacter::ABD_PlayerCharacter()
 {
@@ -37,6 +40,9 @@ ABD_PlayerCharacter::ABD_PlayerCharacter()
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	GetCharacterMovement()->MaxWalkSpeed = 400.f;
 	GetCharacterMovement()->JumpZVelocity = 500.f;
+
+	//HealthBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
+	//HealthBar->SetupAttachment(FollowCamera);
 }
 
 void ABD_PlayerCharacter::BeginPlay()
@@ -56,6 +62,8 @@ void ABD_PlayerCharacter::BeginPlay()
 			}
 		}
 	}
+	//HealthBarWidget = Cast<UBD_HealthBar>(HealthBar->GetUserWidgetObject());
+	//check(HealthBarWidget);
 }
 
 void ABD_PlayerCharacter::Tick(float DeltaTime)
@@ -73,8 +81,8 @@ void ABD_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	{
 		EnhancedComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABD_PlayerCharacter::Move);
 		EnhancedComp->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABD_PlayerCharacter::Look);
-		EnhancedComp->BindAction(JumpAction, ETriggerEvent::Started, this, &ABD_PlayerCharacter::JumpStart);
-		EnhancedComp->BindAction(JumpAction, ETriggerEvent::Completed, this, &ABD_PlayerCharacter::JumpEnd);
+		EnhancedComp->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ABD_PlayerCharacter::JumpInputPressed);
+		EnhancedComp->BindAction(JumpAction, ETriggerEvent::Completed, this, &ABD_PlayerCharacter::JumpInputReleased);
 		EnhancedComp->BindAction(SprintAction, ETriggerEvent::Started, this, &ABD_PlayerCharacter::SprintStart);
 		EnhancedComp->BindAction(SprintAction, ETriggerEvent::Completed, this, &ABD_PlayerCharacter::SprintEnd);
 	}
@@ -110,14 +118,40 @@ void ABD_PlayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void ABD_PlayerCharacter::JumpStart()
+void ABD_PlayerCharacter::JumpInputPressed()
 {
-	Jump();
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent()) 
+	{
+		FGameplayTagContainer JumpTags;
+		JumpTags.AddTag(JumpInputTag);
+		ASC->TryActivateAbilitiesByTag(JumpTags);
+
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(0, 3.f, FColor::Black, FString::Printf(TEXT("Jump Pressed and Add Tag")));
+
+		for (auto& Spec : ASC->GetActivatableAbilities())
+		{
+			if (Spec.Ability && Spec.DynamicAbilityTags.HasTagExact(JumpInputTag))
+			{
+				ASC->AbilitySpecInputPressed(Spec);
+			}
+		}
+	}
 }
 
-void ABD_PlayerCharacter::JumpEnd()
+void ABD_PlayerCharacter::JumpInputReleased()
 {
-	StopJumping();
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		for (auto& Spec : ASC->GetActivatableAbilities())
+		{
+			// JumpInputTag를 가진 어빌리티에서 종료 (ex. GA_Jump::EndAbility)
+			if (Spec.Ability && Spec.DynamicAbilityTags.HasTagExact(JumpInputTag))
+			{
+				ASC->AbilitySpecInputReleased(Spec);
+			}
+		}
+	}
 }
 void ABD_PlayerCharacter::SprintStart()
 {

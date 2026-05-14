@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BD_BaseCharacter.h"
-#include "BD_BaseMonster.generated.h"
+#include "Engine/DataAsset.h"
+#include "BD_EnemyData.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_BLACKDESERT_API ABD_BaseMonster : public ABD_BaseCharacter
+class PROJECT_BLACKDESERT_API UBD_EnemyData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	

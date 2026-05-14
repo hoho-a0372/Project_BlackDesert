@@ -3,15 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BD_BaseEntity.h"
+#include "BD_BaseCharacter.h"
+#include "GameplayTagContainer.h"
 #include "BD_PlayerCharacter.generated.h"
 
 /**
  * 
  */
-UCLASS()
-class PROJECT_BLACKDESERT_API ABD_PlayerCharacter : public ABD_BaseEntity
-{
+UCLASS(Abstract)
+class PROJECT_BLACKDESERT_API ABD_PlayerCharacter : public ABD_BaseCharacter
+{ 
 	GENERATED_BODY()
 	// camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
@@ -33,9 +34,22 @@ class PROJECT_BLACKDESERT_API ABD_PlayerCharacter : public ABD_BaseEntity
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> SprintAction;
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<UInputAction> RollAction;
+	//TObjectPtr<UInputAction> DodgeAction;
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	//TObjectPtr<UInputAction> InteractAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (Categories = "InputTag"))
+	FGameplayTag JumpInputTag; // InputTag.Action.Jump 
+
+	// UI
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowprivateAccess = "true"))
+	//TSubclassOf<class UUserWidget> HealthBarWidgetClass;
+	//UPROPERTY()
+	//class UUserWidget* HealthBarWidgetInstance;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	//TObjectPtr<class UWidgetComponent> HealthBar;
+	//UPROPERTY(EditAnywhere, Category = "UI")
+	//TObjectPtr<class UBD_HealthBar> HealthBarWidget;
 
 public:
 	ABD_PlayerCharacter();
@@ -47,10 +61,10 @@ protected:
 
 	void Move(const struct FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void JumpStart();
-	void JumpEnd();
+	void JumpInputPressed();
+	void JumpInputReleased();
 	void SprintStart();
 	void SprintEnd();
-	//void Roll(const FInputActionValue& Value);
+	//void Dodge(const FInputActionValue& Value);
 	//void Interact(const FInputActionValue& Value);
 };

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BD_BaseCharacter.h"
-#include "BD_BaseMonster.generated.h"
+#include "GameFramework/PlayerController.h"
+#include "BD_PlayerController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_BLACKDESERT_API ABD_BaseMonster : public ABD_BaseCharacter
+class PROJECT_BLACKDESERT_API ABD_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
